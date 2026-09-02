@@ -1,7 +1,9 @@
+/** Tailwind 3 pipeline: the tailwindcss plugin plus autoprefixer. */
 const config = {
   plugins: {
-    "@tailwindcss/postcss": {},
+    tailwindcss: {},
+    autoprefixer: {},
   },
-};
+}
 
-export default config;
+export default config
