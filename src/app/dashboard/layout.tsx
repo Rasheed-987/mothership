@@ -8,8 +8,8 @@ const NAV: (NavItem & { permission?: Permission })[] = [
   { href: '/dashboard/team', label: 'Team', icon: 'users', section: 'Workspace', permission: 'member.view' },
   { href: '/dashboard/roles', label: 'Roles', icon: 'shield', section: 'Workspace', permission: 'role.view' },
   // Sections from the design reference — pages land in later phases.
-  { href: '/dashboard/clients', label: 'Clients', icon: 'briefcase', section: 'Operations', disabled: true },
-  { href: '/dashboard/projects', label: 'Projects', icon: 'folder', section: 'Operations', disabled: true },
+  { href: '/dashboard/clients', label: 'Clients', icon: 'briefcase', section: 'Operations' },
+  { href: '/dashboard/projects', label: 'Projects', icon: 'folder', section: 'Operations' },
   { href: '/dashboard/financials', label: 'Financials', icon: 'dollar', section: 'Operations', disabled: true },
   { href: '/dashboard/pricing', label: 'Pricing', icon: 'tag', section: 'Operations', disabled: true },
   { href: '/dashboard/archive', label: 'Archive', icon: 'archive', section: 'Operations', disabled: true },

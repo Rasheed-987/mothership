@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 /**
@@ -128,18 +129,21 @@ export default function Sidebar({
         max-[860px]:transition-transform max-[860px]:duration-200
         ${open ? '' : 'max-[860px]:-translate-x-full'}`}
     >
-      {/* Brand */}
+      {/* Brand — the PNG has generous padding baked in, so it's rendered
+          oversized and trimmed with negative margins. */}
       <Link
         href="/dashboard"
-        className="flex items-center gap-[11px] px-2 pb-[22px] pt-1.5"
+        className="flex items-center gap-[11px] overflow-hidden px-2 pb-[18px] pt-1"
         onClick={() => setOpen(false)}
       >
-        <span className="flex h-[34px] w-[34px] items-center justify-center rounded-lg bg-accent font-display text-lg font-semibold uppercase text-white">
-          M
-        </span>
-        <span className="font-display text-lg font-semibold uppercase leading-[1.04] tracking-[.06em]">
-          Mothership
-        </span>
+        <Image
+          src="/logo.png"
+          alt="Human Saucer"
+          width={112}
+          height={112}
+          priority
+          className="-mx-4 -my-7 h-28 w-28"
+        />
       </Link>
 
       {/* Nav sections */}

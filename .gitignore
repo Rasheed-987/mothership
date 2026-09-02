@@ -42,3 +42,7 @@ next-env.d.ts
 
 # ...but .env.example documents required vars and should be tracked
 !.env.example
+
+# client demo reference (password-gated content, do not commit)
+demo-app.html
+index (1).html

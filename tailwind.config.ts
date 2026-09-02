@@ -10,6 +10,9 @@ import type { Config } from 'tailwindcss'
  */
 export default {
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
+  // The design is light-only. Class strategy (with no `dark` class ever set)
+  // keeps any leftover `dark:` utilities from activating on OS dark mode.
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
