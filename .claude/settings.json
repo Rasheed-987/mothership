@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -o \"MONGODB_URI=.\\\\{0,30\\\\}\" .env.local)",
+      "Read(//tmp/**)",
+      "Bash(break)",
+      "Bash(curl -s -o /dev/null -w \"pipeline: %{http_code}\\\\n\" http://localhost:3001/dashboard/pipeline)",
+      "Bash(curl -s -o /dev/null -w \"api/deals: %{http_code}\\\\n\" http://localhost:3001/api/deals)"
+    ]
+  }
+}

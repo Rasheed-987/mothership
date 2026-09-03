@@ -28,6 +28,7 @@ type IconName =
   | 'shield'
   | 'briefcase'
   | 'folder'
+  | 'trendUp'
   | 'dollar'
   | 'tag'
   | 'archive'
@@ -65,6 +66,12 @@ const ICONS: Record<IconName, React.ReactNode> = {
   ),
   folder: (
     <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l2.5 2.5h8.5A1.5 1.5 0 0 1 21 9v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z" />
+  ),
+  trendUp: (
+    <>
+      <path d="M3 17l6-6 4 4 8-8" />
+      <path d="M15 7h6v6" />
+    </>
   ),
   dollar: (
     <>

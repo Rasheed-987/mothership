@@ -37,3 +37,25 @@ export function aedShort(n: number) {
   if (Math.abs(n) >= 1e3) return `AED ${Math.round(n / 1e3)}K`
   return `AED ${Math.round(n)}`
 }
+
+/** 24 Jun 2026 style. Accepts an ISO string or Date; em-dash for nothing. */
+export function fmtDate(
+  value: string | Date | null | undefined,
+  opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' },
+) {
+  if (!value) return '—'
+  const d = value instanceof Date ? value : new Date(value)
+  if (isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('en-GB', opts)
+}
+
+/** 24 June style — day + full month, no year. */
+export function fmtDay(value: string | Date | null | undefined) {
+  return fmtDate(value, { day: 'numeric', month: 'long' })
+}
+
+/** 31 July 2026 style — for the "Target launch" hero. */
+export function fmtLong(value: string | Date | null | undefined) {
+  return fmtDate(value, { day: 'numeric', month: 'long', year: 'numeric' })
+}
+

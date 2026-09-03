@@ -1,71 +1,43 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { PageHeader } from '@/components/ui'
 import { aed, avTint, initials } from '@/lib/demo-format'
+import { PROJECT_CATEGORIES } from '@/lib/project-constants'
+import type { ProjectListDTO } from '@/lib/services/projects'
+import ProjectModal from '@/components/project-modal'
 
 /**
- * Projects repository, mirroring the demo's `renderProjectsAll()`: page head,
- * filter button with a Status/Service popover (`.fltr-bar`/`.fltr-pop`), and a
- * `.dtable` inside a panel — Client / Project / Service / Status / Value rows
- * sorted by value, with cap-pill statuses and clickable service tags.
+ * Projects repository: page head, a Status/Service filter popover, and a table
+ * inside a panel — Client / Project / Service / Status / Value rows. Rows link
+ * through to the individual project page.
  */
-
-export type Project = {
-  id: string
-  client: string
-  projectName: string
-  status:
-    | '1. Discussions'
-    | '2. Proposal'
-    | '3. Contract Signed'
-    | '4. Not Yet Started'
-    | '5. In Progress'
-    | '6. Completed'
-    | '7. Rejected / Lost'
-  value: number
-  category: string
-  liveStatus?: 'On schedule' | 'Behind'
-  daysBehind?: number
-  hold?: boolean
-  proposalConfidence?: 'High' | 'Low'
-}
-
-const CATEGORIES = [
-  'Branding',
-  'Web Design & Development',
-  'Social Media',
-  'Animation & Video',
-  'Marketing',
-  'Creative',
-]
 
 const PROJ_FILTERS = [
   ['active', 'Active projects'],
   ['all', 'All statuses'],
   ['behind', 'Behind'],
   ['ontrack', 'On track'],
-  ['pipeline', 'Pipeline'],
+  ['pipeline', 'Planning'],
   ['completed', 'Completed'],
 ] as const
 
 type FilterKey = (typeof PROJ_FILTERS)[number][0]
 
-// --- status helpers ported from the demo ---
+const isDelivery = (p: ProjectListDTO) =>
+  p.status === 'active' || p.status === 'on_hold' || p.status === 'completed'
 
-const isDelivery = (p: Project) =>
-  ['4. Not Yet Started', '5. In Progress', '6. Completed'].includes(p.status)
-
-function deliveryState(p: Project) {
-  if (p.status === '6. Completed') return 'completed'
-  if (p.hold) return 'hold'
-  if (p.liveStatus === 'Behind') return (p.daysBehind ?? 0) > 7 ? 'delayed' : 'behind'
+function deliveryState(p: ProjectListDTO) {
+  if (p.status === 'completed') return 'completed'
+  if (p.status === 'on_hold') return 'hold'
+  if (p.health === 'behind') return p.daysBehind > 7 ? 'delayed' : 'behind'
   return 'ontrack'
 }
 
 type Cap = { label: string; className: string; icon?: 'check' | 'clock' | 'alert' }
 
-function statusCap(p: Project): Cap {
+function statusCap(p: ProjectListDTO): Cap {
   if (isDelivery(p)) {
     const s = deliveryState(p)
     if (s === 'completed') return { label: 'Completed', className: 'bg-surface-3 text-muted', icon: 'check' }
@@ -74,9 +46,8 @@ function statusCap(p: Project): Cap {
     if (s === 'behind') return { label: 'Behind schedule', className: 'bg-[rgba(217,131,31,.15)] text-[#C2741A]', icon: 'clock' }
     return { label: 'On track', className: 'bg-[rgba(30,158,106,.13)] text-ok', icon: 'check' }
   }
-  if (p.status === '1. Discussions') return { label: 'Discussions', className: 'bg-surface-3 text-muted' }
-  if (p.proposalConfidence === 'High') return { label: 'Proposal · high', className: 'bg-[rgba(107,79,230,.13)] text-[#5B40D6]' }
-  return { label: 'Proposal · low', className: 'bg-[rgba(124,92,255,.13)] text-[#7C5CE6]' }
+  if (p.status === 'cancelled') return { label: 'Cancelled', className: 'bg-[rgba(224,57,43,.12)] text-bad', icon: 'alert' }
+  return { label: 'Planning', className: 'bg-surface-3 text-muted', icon: 'clock' }
 }
 
 const CAP_ICONS = {
@@ -95,19 +66,33 @@ const CAP_ICONS = {
   ),
 }
 
-export default function ProjectsView({ projects }: { projects: Project[] }) {
+interface ProjectsViewProps {
+  projects: ProjectListDTO[]
+  canCreate?: boolean
+  clientOptions?: { id: string; name: string }[]
+  teamOptions?: { id: string; name: string }[]
+}
+
+export default function ProjectsView({
+  projects,
+  canCreate = false,
+  clientOptions = [],
+  teamOptions = [],
+}: ProjectsViewProps) {
+  const router = useRouter()
   const [filter, setFilter] = useState<FilterKey>('active')
   const [cat, setCat] = useState('all')
   const [popOpen, setPopOpen] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
 
-  const statusMatch = (p: Project) => {
+  const statusMatch = (p: ProjectListDTO) => {
     const s = deliveryState(p)
-    if (filter === 'active') return isDelivery(p) && p.status !== '6. Completed'
-    if (filter === 'behind') return isDelivery(p) && p.status !== '6. Completed' && (s === 'behind' || s === 'delayed')
-    if (filter === 'ontrack') return isDelivery(p) && p.status !== '6. Completed' && s === 'ontrack'
-    if (filter === 'pipeline') return p.status === '1. Discussions' || p.status === '2. Proposal'
-    if (filter === 'completed') return p.status === '6. Completed'
-    return p.status !== '7. Rejected / Lost'
+    if (filter === 'active') return isDelivery(p) && p.status !== 'completed'
+    if (filter === 'behind') return isDelivery(p) && p.status !== 'completed' && (s === 'behind' || s === 'delayed')
+    if (filter === 'ontrack') return isDelivery(p) && p.status !== 'completed' && s === 'ontrack'
+    if (filter === 'pipeline') return p.status === 'planning'
+    if (filter === 'completed') return p.status === 'completed'
+    return p.status !== 'cancelled'
   }
 
   const list = projects
@@ -139,6 +124,20 @@ export default function ProjectsView({ projects }: { projects: Project[] }) {
       <PageHeader
         title="Projects"
         description="The full repository — every entry regardless of stage. Defaults to active projects; use the filter for anything else."
+        action={
+          canCreate ? (
+            <button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              className="flex shrink-0 items-center gap-2 rounded-field bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-press"
+            >
+              <svg viewBox="0 0 24 24" className="h-[17px] w-[17px] fill-none stroke-current [stroke-linecap:round] [stroke-linejoin:round] [stroke-width:2]">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              New project
+            </button>
+          ) : null
+        }
       />
 
       {/* Filter bar */}
@@ -169,7 +168,7 @@ export default function ProjectsView({ projects }: { projects: Project[] }) {
                   Service
                 </div>
                 <Option on={cat === 'all'} label="All services" onClick={() => setCat('all')} />
-                {CATEGORIES.map((c) => (
+                {PROJECT_CATEGORIES.map((c) => (
                   <Option key={c} on={cat === c} label={c} onClick={() => setCat(c)} />
                 ))}
                 <div
@@ -215,26 +214,30 @@ export default function ProjectsView({ projects }: { projects: Project[] }) {
                 return (
                   <tr
                     key={p.id}
+                    onClick={() => router.push(`/dashboard/projects/${p.id}`)}
                     className={`group cursor-pointer transition-colors hover:bg-surface-2
-                      ${p.status === '6. Completed' ? 'opacity-50 hover:opacity-90' : ''}`}
+                      ${p.status === 'completed' ? 'opacity-50 hover:opacity-90' : ''}`}
                   >
                     <td className={`px-4 py-[17px] text-sm font-semibold text-ink ${idx > 0 ? 'border-t border-line' : ''}`}>
                       <div className="flex min-w-0 items-center gap-[11px]">
                         <span
-                          className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${avTint(p.client)}`}
+                          className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${avTint(p.clientName)}`}
                         >
-                          {initials(p.client)}
+                          {initials(p.clientName)}
                         </span>
-                        <span className="overflow-hidden text-ellipsis whitespace-nowrap">{p.client}</span>
+                        <span className="overflow-hidden text-ellipsis whitespace-nowrap">{p.clientName}</span>
                       </div>
                     </td>
                     <td className={`px-4 py-[17px] text-sm text-body ${idx > 0 ? 'border-t border-line' : ''}`}>
-                      {p.projectName}
+                      {p.name}
                     </td>
                     <td className={`px-4 py-[17px] ${idx > 0 ? 'border-t border-line' : ''}`}>
                       <button
                         type="button"
-                        onClick={() => setCat(p.category)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setCat(p.category)
+                        }}
                         className="inline-flex h-6 items-center whitespace-nowrap rounded-[20px] border border-line bg-surface-3 px-2.5 text-[11px] font-semibold text-ink-2 transition-colors hover:border-ink hover:bg-surface"
                       >
                         {p.category}
@@ -279,6 +282,15 @@ export default function ProjectsView({ projects }: { projects: Project[] }) {
           </table>
         </div>
       </div>
+
+      {canCreate && (
+        <ProjectModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          clientOptions={clientOptions}
+          teamOptions={teamOptions}
+        />
+      )}
     </>
   )
 }
