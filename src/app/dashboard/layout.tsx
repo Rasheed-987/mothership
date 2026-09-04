@@ -12,7 +12,7 @@ const NAV: (NavItem & { permission?: Permission })[] = [
   { href: '/dashboard/pipeline', label: 'Sales pipeline', icon: 'trendUp', section: 'Operations', permission: 'deal.view' },
   { href: '/dashboard/projects', label: 'Projects', icon: 'folder', section: 'Operations' },
   { href: '/dashboard/financials', label: 'Financials', icon: 'dollar', section: 'Operations', disabled: true },
-  { href: '/dashboard/pricing', label: 'Pricing', icon: 'tag', section: 'Operations', disabled: true },
+  { href: '/dashboard/pricing', label: 'Pricing', icon: 'tag', section: 'Operations', permission: 'service.view' },
   { href: '/dashboard/archive', label: 'Archive', icon: 'archive', section: 'Operations', disabled: true },
 ]
 

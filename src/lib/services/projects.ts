@@ -17,6 +17,7 @@ import {
 import { Client, type IContact } from '@/models/Client'
 import { User } from '@/models/User'
 import type { CurrentUser } from '@/lib/authz'
+import { loadDayRates, computePricing } from './pricing'
 import { ServiceError } from './roles'
 export { ServiceError } from './roles'
 
@@ -167,8 +168,10 @@ export type ProjectDetailDTO = {
   stages: ProjectStageDTO[]
   activity: ProjectActivityDTO[]
   clientAsks: ProjectAskDTO[]
-  /** Suggested price from the pricing sheet — null until the rate card lands. */
+  /** Computed from the pricing sheet at its submitted tier; null when there's no sheet. */
   pricingSuggested: number | null
+  /** How the sold price (`value`) compares to the suggestion: sold − suggested. */
+  pricingGap: number | null
 }
 
 /* ----------------------------------------------------------------------------
@@ -268,12 +271,22 @@ export async function getProjectById(idOrCode: string): Promise<ProjectDetailDTO
     : await Project.findOne({ code: idOrCode.toUpperCase() }).lean()
   if (!project) return null
 
-  const [client, manager] = await Promise.all([
+  const [client, manager, rates] = await Promise.all([
     Client.findById(project.clientId).select('name industry address email phone contacts').lean(),
     project.managerId ? User.findById(project.managerId).select('name').lean() : null,
+    project.pricing ? loadDayRates() : null,
   ])
 
   const progress = computeProgress(project.stages ?? [])
+
+  let pricingSuggested: number | null = null
+  let pricingGap: number | null = null
+  if (project.pricing && rates) {
+    const submittedTier = project.pricing.submittedTier ?? project.pricing.tier
+    pricingSuggested = Math.round(computePricing(project.pricing, rates, submittedTier).total)
+    const sold = project.budget?.amount ? project.budget.amount / 100 : 0
+    pricingGap = sold ? Math.round(sold - pricingSuggested) : null
+  }
 
   return {
     id: String(project._id),
@@ -326,7 +339,8 @@ export async function getProjectById(idOrCode: string): Promise<ProjectDetailDTO
       dueOn: k.dueOn ? k.dueOn.toISOString() : null,
       received: Boolean(k.received),
     })),
-    pricingSuggested: null,
+    pricingSuggested,
+    pricingGap,
   }
 }
 

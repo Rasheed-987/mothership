@@ -33,3 +33,17 @@ export const objectId = (ref: string, required = false) => ({
   ref,
   required,
 })
+
+/**
+ * Client business size. Drives the rate card: the same role costs 2–3× more for a
+ * large corporate than a small business. Lives here because Client, Project
+ * (pricing sheet) and Service (tier rates) all speak it.
+ */
+export const CLIENT_TIERS = ['small', 'medium', 'large'] as const
+export type ClientTier = (typeof CLIENT_TIERS)[number]
+
+export const TIER_LABELS: Record<ClientTier, string> = {
+  small: 'Small business',
+  medium: 'Medium business',
+  large: 'Large corporate',
+}

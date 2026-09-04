@@ -15,6 +15,7 @@ import { Role } from '../src/models/Role'
 import { User } from '../src/models/User'
 import { Project } from '../src/models/Project'
 import { Deal } from '../src/models/Deal'
+import { Service } from '../src/models/Service'
 import '../src/models'
 
 const SYSTEM_ROLES: {
@@ -174,18 +175,18 @@ async function main() {
     const creator = (await User.findOne({ isSuperAdmin: true }).lean()) || (await User.findOne({ email: waleedEmail }).lean())
     if (creator) {
       const SEED_CLIENTS = [
-        { name: 'One Health', industry: 'Healthcare', status: 'active', address: { country: 'UAE' }, contacts: [{ name: 'Dr. Tariq', email: 'tariq@onehealth.ae', phone: '+971 50 118 4420', isPrimary: true }] },
-        { name: 'PureHealth', industry: 'Health', status: 'active', address: { country: 'UAE' }, contacts: [{ name: 'Omar Nasser', email: 'omar@purehealth.ae', phone: '+971 53 137 1271', isPrimary: true }] },
-        { name: 'GLP', industry: 'Government', status: 'active', address: { country: 'UAE' }, contacts: [{ name: 'Khalid Al Mansoori', email: 'khalid@glp.gov.ae', isPrimary: true }] },
-        { name: 'Zeyra Glow', industry: 'Beauty & Cosmetics', status: 'active', address: { country: 'UAE' }, contacts: [{ name: 'Zeyneb', email: 'contact@zeyraglow.com', isPrimary: true }] },
-        { name: 'Rove Resorts', industry: 'Hospitality', status: 'active', address: { country: 'UAE' }, contacts: [{ name: 'Marc Ross', email: 'marc@roveresorts.com', isPrimary: true }] },
-        { name: 'Rove', industry: 'Hospitality', status: 'inactive', address: { country: 'UAE' }, contacts: [{ name: 'Marc Ross', email: 'marc@rove.com', isPrimary: true }] },
-        { name: 'Department of Finance', industry: 'Government', status: 'lead', address: { country: 'UAE' }, contacts: [{ name: 'Saeed Al Maktoum', email: 'saeed@dof.gov.ae', isPrimary: true }] },
-        { name: 'Rafed', industry: 'Healthcare', status: 'lead', address: { country: 'UAE' }, contacts: [{ name: 'Hamed Al Mazrouei', email: 'hamed@rafed.ae', isPrimary: true }] },
-        { name: 'Colorland Toys', industry: 'Retail', status: 'lead', address: { country: 'UAE' }, contacts: [{ name: 'Fatima', email: 'fatima@colorland.ae', isPrimary: true }] },
-        { name: 'Al Maryah Community', industry: 'Healthcare', status: 'lead', address: { country: 'UAE' }, contacts: [{ name: 'Omar', email: 'omar@almaryah.ae', isPrimary: true }] },
-        { name: 'Dubai Municipality', industry: 'Government', status: 'lead', address: { country: 'UAE' }, contacts: [{ name: 'Rashid', email: 'rashid@dm.gov.ae', isPrimary: true }] },
-        { name: 'ElephantSkin', industry: 'Sustainable Gloves', status: 'archived', address: { country: 'Brazil' }, contacts: [{ name: 'Lucas', email: 'lucas@elephantskin.com', isPrimary: true }] },
+        { name: 'One Health', industry: 'Healthcare', status: 'active', tier: 'medium', address: { country: 'UAE' }, contacts: [{ name: 'Dr. Tariq', email: 'tariq@onehealth.ae', phone: '+971 50 118 4420', isPrimary: true }] },
+        { name: 'PureHealth', industry: 'Health', status: 'active', tier: 'large', address: { country: 'UAE' }, contacts: [{ name: 'Omar Nasser', email: 'omar@purehealth.ae', phone: '+971 53 137 1271', isPrimary: true }] },
+        { name: 'GLP', industry: 'Government', status: 'active', tier: 'large', address: { country: 'UAE' }, contacts: [{ name: 'Khalid Al Mansoori', email: 'khalid@glp.gov.ae', isPrimary: true }] },
+        { name: 'Zeyra Glow', industry: 'Beauty & Cosmetics', status: 'active', tier: 'small', address: { country: 'UAE' }, contacts: [{ name: 'Zeyneb', email: 'contact@zeyraglow.com', isPrimary: true }] },
+        { name: 'Rove Resorts', industry: 'Hospitality', status: 'active', tier: 'medium', address: { country: 'UAE' }, contacts: [{ name: 'Marc Ross', email: 'marc@roveresorts.com', isPrimary: true }] },
+        { name: 'Rove', industry: 'Hospitality', status: 'inactive', tier: 'small', address: { country: 'UAE' }, contacts: [{ name: 'Marc Ross', email: 'marc@rove.com', isPrimary: true }] },
+        { name: 'Department of Finance', industry: 'Government', status: 'lead', tier: 'large', address: { country: 'UAE' }, contacts: [{ name: 'Saeed Al Maktoum', email: 'saeed@dof.gov.ae', isPrimary: true }] },
+        { name: 'Rafed', industry: 'Healthcare', status: 'lead', tier: 'medium', address: { country: 'UAE' }, contacts: [{ name: 'Hamed Al Mazrouei', email: 'hamed@rafed.ae', isPrimary: true }] },
+        { name: 'Colorland Toys', industry: 'Retail', status: 'lead', tier: 'small', address: { country: 'UAE' }, contacts: [{ name: 'Fatima', email: 'fatima@colorland.ae', isPrimary: true }] },
+        { name: 'Al Maryah Community', industry: 'Healthcare', status: 'lead', tier: 'medium', address: { country: 'UAE' }, contacts: [{ name: 'Omar', email: 'omar@almaryah.ae', isPrimary: true }] },
+        { name: 'Dubai Municipality', industry: 'Government', status: 'lead', tier: 'large', address: { country: 'UAE' }, contacts: [{ name: 'Rashid', email: 'rashid@dm.gov.ae', isPrimary: true }] },
+        { name: 'ElephantSkin', industry: 'Sustainable Gloves', status: 'archived', tier: 'small', address: { country: 'Brazil' }, contacts: [{ name: 'Lucas', email: 'lucas@elephantskin.com', isPrimary: true }] },
       ]
       for (const c of SEED_CLIENTS) {
         await Client.create({
@@ -563,6 +564,107 @@ async function main() {
         made += 1
       }
       console.log(`   ✓ seeded ${made} deals`)
+    }
+  }
+
+  // Backfill client tiers (business size) — added after clients were first seeded.
+  {
+    const TIER_BY_CLIENT: Record<string, 'small' | 'medium' | 'large'> = {
+      PureHealth: 'large',
+      'Department of Finance': 'large',
+      GLP: 'large',
+      'Dubai Municipality': 'large',
+      'One Health': 'medium',
+      Rafed: 'medium',
+      'Al Maryah Community': 'medium',
+      'Rove Resorts': 'medium',
+    }
+    const untiered = await Client.find({ tier: { $exists: false } }).lean()
+    for (const c of untiered) {
+      await Client.updateOne({ _id: c._id }, { $set: { tier: TIER_BY_CLIENT[c.name] ?? 'small' } })
+    }
+    if (untiered.length) console.log(`→ backfilled tier on ${untiered.length} client(s)`)
+  }
+
+  // Seed the rate card (Service rows) if empty
+  const serviceCount = await Service.countDocuments()
+  if (serviceCount === 0) {
+    console.log('→ seeding rate card…')
+    const creator =
+      (await User.findOne({ isSuperAdmin: true }).lean()) || (await User.findOne({ email: waleedEmail }).lean())
+    if (creator) {
+      const H = 8 // hours per day
+      const RATE_CARD = [
+        { name: 'Brand Strategist', note: 'From the UAE 2024 Marketing Director salary bands.', hourly: { small: 125, medium: 281.25, large: 410 } },
+        { name: 'Junior Project Manager', note: 'HS base rate 18.75/hr × 2 / 2.5 / 3.', hourly: { small: 38, medium: 48, large: 57 } },
+        { name: 'Designer', note: 'Estimate — listed as a future role in the sheet.', hourly: { small: 65, medium: 95, large: 130 } },
+        { name: 'Creative Director', note: 'Estimate — listed as a future role in the sheet.', hourly: { small: 150, medium: 250, large: 375 } },
+      ]
+      for (const r of RATE_CARD) {
+        const slug = r.name.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+        const tierRates = (['small', 'medium', 'large'] as const).map((tier) => ({
+          tier,
+          hourlyRate: { amount: Math.round(r.hourly[tier] * 100), currency: 'AED' },
+          dayRate: { amount: Math.round(r.hourly[tier] * H * 100), currency: 'AED' },
+        }))
+        await Service.create({
+          code: `ROLE-${slug}`,
+          name: r.name,
+          description: r.note,
+          category: 'Role',
+          pricingModel: 'daily',
+          rate: tierRates[0].dayRate,
+          tierRates,
+          unit: 'day',
+          taxRatePct: 0,
+          isActive: true,
+          createdBy: creator._id,
+        })
+      }
+      console.log(`   ✓ seeded ${RATE_CARD.length} rate-card roles`)
+    }
+  }
+
+  // Backfill Project.pricing sheets for projects that don't have one
+  {
+    const withoutSheet = await Project.find({ $or: [{ pricing: null }, { pricing: { $exists: false } }] })
+    if (withoutSheet.length) {
+      console.log('→ building pricing sheets…')
+      const services = await Service.find({ category: 'Role' }).lean()
+      const svcByName = new Map(services.map((s) => [s.name, s._id]))
+      const clientsById = new Map((await Client.find().select('name tier').lean()).map((c) => [String(c._id), c]))
+
+      const res = (role: string, allocationPct: number) => ({
+        name: role,
+        role,
+        serviceId: svcByName.get(role) ?? null,
+        allocationPct,
+      })
+
+      let made = 0
+      for (const p of withoutSheet) {
+        const client = clientsById.get(String(p.clientId))
+        const tier = client?.tier ?? 'small'
+        const name = `${p.name} ${p.tags?.[0] ?? ''}`.toLowerCase()
+        const isDesign = /web|ui|ux|design|brand|identity|guideline/.test(name)
+        const isWeb = /web|ui|ux|app/.test(name)
+
+        const phases = isDesign
+          ? [
+              { name: 'Phase 1 · Strategy & concept', workDays: 30, resources: [res('Brand Strategist', 100), res('Junior Project Manager', 50)] },
+              { name: 'Phase 2 · Design & build', workDays: 55, resources: [res('Designer', 100), res('Junior Project Manager', 30)] },
+            ]
+          : [{ name: 'Phase 1 · Delivery', workDays: 40, resources: [res('Brand Strategist', 100), res('Junior Project Manager', 50)] }]
+
+        const thirdParty = isWeb
+          ? [{ vendorName: 'Dev partner', description: 'Development & QA (vendor)', costToHs: 8_000 * 100, markupPct: 0.4 }]
+          : []
+
+        p.pricing = { tier, submittedTier: tier, tePct: 0.05, adminPct: 0.05, phases, thirdParty, waitingVendor: false }
+        await p.save()
+        made += 1
+      }
+      console.log(`   ✓ built ${made} pricing sheets`)
     }
   }
 

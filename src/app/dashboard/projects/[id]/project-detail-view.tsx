@@ -280,6 +280,28 @@ export default function ProjectDetailView({
             <div className="font-display text-3xl font-semibold text-ink [font-variant-numeric:tabular-nums]">
               {aed(project.pricingSuggested)}
             </div>
+            {project.pricingGap != null && (
+              <div className="mt-1 text-xs text-muted">
+                Sold for {aed(project.value)}
+                {Math.abs(project.pricingGap) > 1 && (
+                  <>
+                    {' · '}
+                    <span className={project.pricingGap >= 0 ? 'font-semibold text-ok' : 'font-semibold text-bad'}>
+                      {aed(Math.abs(project.pricingGap))} {project.pricingGap >= 0 ? 'above' : 'below'}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
+            <Link
+              href={`/dashboard/pricing/${project.id}`}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-field border border-line-2 bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface-2"
+            >
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-none stroke-current [stroke-width:2]">
+                <path d="M3 7h18v13H3zM3 11h18M8 3v4M16 3v4" />
+              </svg>
+              Open pricing sheet
+            </Link>
           </InfoCard>
         )}
 

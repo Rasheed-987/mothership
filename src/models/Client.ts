@@ -1,4 +1,5 @@
 import { Schema, model, models, type Model, type Types } from 'mongoose'
+import { CLIENT_TIERS, type ClientTier } from './shared'
 
 export const CLIENT_STATUSES = ['lead', 'active', 'inactive', 'archived'] as const
 export type ClientStatus = (typeof CLIENT_STATUSES)[number]
@@ -28,6 +29,8 @@ export interface IClient {
   }
   industry?: string
   status: ClientStatus
+  /** Business size — the default tier for every pricing sheet on this client's projects. */
+  tier: ClientTier
   /** Account manager. */
   ownerId?: Types.ObjectId | null
   /** Embedded: small, bounded, and never queried independently of the client. */
@@ -67,6 +70,7 @@ const ClientSchema = new Schema<IClient>(
     },
     industry: { type: String, trim: true },
     status: { type: String, enum: CLIENT_STATUSES, required: true, default: 'lead' },
+    tier: { type: String, enum: CLIENT_TIERS, required: true, default: 'small' },
     ownerId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     contacts: { type: [ContactSchema], default: [] },
     tags: { type: [String], default: [] },

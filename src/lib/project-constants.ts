@@ -49,3 +49,15 @@ export const RESOURCE_KIND_OPTIONS: { value: string; label: string }[] = [
   { value: 'proposal', label: 'Proposal' },
   { value: 'other', label: 'Other' },
 ]
+
+/** Client business-size tier. Keep in sync with CLIENT_TIERS in src/models/shared.ts. */
+export const TIER_LABELS: Record<string, string> = {
+  small: 'Small business',
+  medium: 'Medium business',
+  large: 'Large corporate',
+}
+export const TIER_OPTIONS: { value: string; label: string }[] = [
+  { value: 'small', label: 'Small business' },
+  { value: 'medium', label: 'Medium business' },
+  { value: 'large', label: 'Large corporate' },
+]

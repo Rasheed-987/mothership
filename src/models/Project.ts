@@ -1,5 +1,8 @@
 import { Schema, model, models, type Model, type Types } from 'mongoose'
-import { MoneySchema, type IMoney } from './shared'
+import { MoneySchema, CLIENT_TIERS, type IMoney, type ClientTier } from './shared'
+
+// Re-exported for back-compat: tiers used to live here.
+export { CLIENT_TIERS, type ClientTier } from './shared'
 
 export const PROJECT_STATUSES = ['planning', 'active', 'on_hold', 'completed', 'cancelled'] as const
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number]
@@ -9,9 +12,6 @@ export type ProjectPriority = (typeof PROJECT_PRIORITIES)[number]
 
 export const BILLING_TYPES = ['fixed', 'hourly', 'retainer', 'non_billable'] as const
 export type BillingType = (typeof BILLING_TYPES)[number]
-
-export const CLIENT_TIERS = ['small', 'medium', 'large'] as const
-export type ClientTier = (typeof CLIENT_TIERS)[number]
 
 /** Delivery health — the client-facing "on schedule / behind" signal, separate from the lifecycle `status`. */
 export const PROJECT_HEALTH = ['on_track', 'behind'] as const
@@ -26,7 +26,9 @@ export type ResourceKind = (typeof RESOURCE_KINDS)[number]
 
 export interface IPricingResource {
   name: string
+  /** Cached label. `serviceId` is the real link to the rate-card row. */
   role: string
+  serviceId?: Types.ObjectId | null
   allocationPct: number
 }
 
@@ -44,12 +46,16 @@ export interface IThirdPartyCost {
 }
 
 export interface IPricingSheet {
+  /** The effective tier this sheet is priced at. Defaults from the client, editable. */
   tier: ClientTier
+  /** The tier actually quoted to the client (may differ from `tier` while exploring). */
   submittedTier?: ClientTier
   tePct: number    // Travel & Expenses % (default 0.05 / 5%)
   adminPct: number // Admin fee % (default 0.05 / 5%)
   phases: IPricingPhase[]
   thirdParty: IThirdPartyCost[]
+  /** Vendor prices still outstanding — shown on the sheet. */
+  waitingVendor?: boolean
 }
 
 /** One row of the client-facing "The plan" timeline. */
@@ -140,6 +146,7 @@ const PricingResourceSchema = new Schema<IPricingResource>(
   {
     name: { type: String, required: true, trim: true },
     role: { type: String, required: true, trim: true },
+    serviceId: { type: Schema.Types.ObjectId, ref: 'Service', default: null },
     allocationPct: { type: Number, required: true, default: 100, min: 0, max: 1000 },
   },
   { _id: false },
@@ -172,6 +179,7 @@ const PricingSheetSchema = new Schema<IPricingSheet>(
     adminPct: { type: Number, required: true, default: 0.05, min: 0, max: 1 },
     phases: { type: [PricingPhaseSchema], default: [] },
     thirdParty: { type: [ThirdPartyCostSchema], default: [] },
+    waitingVendor: { type: Boolean, default: false },
   },
   { _id: false },
 )
