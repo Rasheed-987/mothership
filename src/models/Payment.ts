@@ -19,6 +19,8 @@ export interface IPayment {
   reference?: string
   receivedAt: Date
   notes?: string
+  reconciled?: boolean
+  reconciledAt?: Date | null
   recordedBy: Types.ObjectId
   createdAt: Date
 }
@@ -33,6 +35,8 @@ const PaymentSchema = new Schema<IPayment>(
     reference: { type: String, trim: true },
     receivedAt: { type: Date, required: true, default: Date.now },
     notes: { type: String },
+    reconciled: { type: Boolean, default: false },
+    reconciledAt: { type: Date, default: null },
     recordedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: { createdAt: true, updatedAt: false } },

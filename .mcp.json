@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "mothership": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npm run mcp"
+      ]
+    }
+  }
+}

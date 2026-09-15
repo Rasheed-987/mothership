@@ -10,9 +10,11 @@
     "seed": "tsx --tsconfig tsconfig.scripts.json --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/seed.ts",
     "typecheck": "tsc --noEmit",
     "smoke": "tsx --tsconfig tsconfig.scripts.json --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/smoke-test.ts",
-    "e2e": "tsx --tsconfig tsconfig.scripts.json --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/e2e-invite.ts"
+    "e2e": "tsx --tsconfig tsconfig.scripts.json --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/e2e-invite.ts",
+    "mcp": "tsx --tsconfig tsconfig.scripts.json --env-file-if-exists=.env --env-file-if-exists=.env.local src/mcp/server.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/server": "^2.0.0",
     "@node-rs/argon2": "^2.1.0",
     "geist": "^1.7.2",
     "mongoose": "^8.24.3",
