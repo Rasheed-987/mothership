@@ -129,6 +129,7 @@ export default function ClientModal({ isOpen, onClose, client, onDeleted }: Clie
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-line-2 bg-surface-2 text-muted">
                 {logoPreview ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={logoPreview} alt="Logo preview" className="h-full w-full rounded-lg object-contain p-1" />
                 ) : (
                   <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current [stroke-width:2]">

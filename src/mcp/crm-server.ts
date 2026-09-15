@@ -38,8 +38,8 @@ export function createCrmMcpServer(): McpServer {
         },
       }),
     },
-    async (args: any) => {
-      const { status, search } = args || {}
+    async (args: unknown) => {
+      const { status, search } = (args || {}) as { status?: string; search?: string }
       try {
         await connectDB()
         let projects = await listProjects()
@@ -49,6 +49,7 @@ export function createCrmMcpServer(): McpServer {
         }
 
         if (search) {
+                
           const q = String(search).toLowerCase().trim()
           projects = projects.filter(
             (p) =>
@@ -72,9 +73,9 @@ export function createCrmMcpServer(): McpServer {
         return {
           content: [{ type: 'text', text: JSON.stringify(summary, null, 2) }],
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         return {
-          content: [{ type: 'text', text: `Error listing projects: ${err?.message || String(err)}` }],
+          content: [{ type: 'text', text: `Error listing projects: ${err instanceof Error ? err.message : String(err)}` }],
         }
       }
     },
@@ -100,8 +101,8 @@ export function createCrmMcpServer(): McpServer {
         required: ['identifier'],
       }),
     },
-    async (args: any) => {
-      const { identifier } = args || {}
+    async (args: unknown) => {
+      const { identifier } = (args || {}) as { identifier?: string }
       try {
         await connectDB()
         let project = await getProjectById(String(identifier).trim())
@@ -125,9 +126,9 @@ export function createCrmMcpServer(): McpServer {
         return {
           content: [{ type: 'text', text: JSON.stringify(project, null, 2) }],
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         return {
-          content: [{ type: 'text', text: `Error retrieving project context: ${err?.message || String(err)}` }],
+          content: [{ type: 'text', text: `Error retrieving project context: ${err instanceof Error ? err.message : String(err)}` }],
         }
       }
     },
@@ -161,8 +162,12 @@ export function createCrmMcpServer(): McpServer {
         required: ['projectCode', 'text'],
       }),
     },
-    async (args: any) => {
-      const { projectCode, text, pending } = args || {}
+    async (args: unknown) => {
+      const { projectCode, text, pending } = (args || {}) as {
+        projectCode?: string
+        text?: string
+        pending?: boolean
+      }
       try {
         await connectDB()
         const project = await Project.findOne({ code: String(projectCode).toUpperCase().trim() })
@@ -188,9 +193,9 @@ export function createCrmMcpServer(): McpServer {
             },
           ],
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         return {
-          content: [{ type: 'text', text: `Error logging activity: ${err?.message || String(err)}` }],
+          content: [{ type: 'text', text: `Error logging activity: ${err instanceof Error ? err.message : String(err)}` }],
         }
       }
     },
@@ -238,8 +243,15 @@ export function createCrmMcpServer(): McpServer {
         required: ['projectCode'],
       }),
     },
-    async (args: any) => {
-      const { projectCode, health, daysBehind, progressNote, delayNote, status } = args || {}
+    async (args: unknown) => {
+      const { projectCode, health, daysBehind, progressNote, delayNote, status } = (args || {}) as {
+        projectCode?: string
+        health?: (typeof PROJECT_HEALTH)[number]
+        daysBehind?: number
+        progressNote?: string
+        delayNote?: string
+        status?: (typeof PROJECT_STATUSES)[number]
+      }
       try {
         await connectDB()
         const project = await Project.findOne({ code: String(projectCode).toUpperCase().trim() })
@@ -266,9 +278,9 @@ export function createCrmMcpServer(): McpServer {
             },
           ],
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         return {
-          content: [{ type: 'text', text: `Error updating project health: ${err?.message || String(err)}` }],
+          content: [{ type: 'text', text: `Error updating project health: ${err instanceof Error ? err.message : String(err)}` }],
         }
       }
     },
@@ -310,8 +322,14 @@ export function createCrmMcpServer(): McpServer {
         required: ['projectCode', 'action', 'title'],
       }),
     },
-    async (args: any) => {
-      const { projectCode, action, title, note, dueOn } = args || {}
+    async (args: unknown) => {
+      const { projectCode, action, title, note, dueOn } = (args || {}) as {
+        projectCode?: string
+        action?: string
+        title?: string
+        note?: string
+        dueOn?: string
+      }
       try {
         await connectDB()
         const project = await Project.findOne({ code: String(projectCode).toUpperCase().trim() })
@@ -361,9 +379,9 @@ export function createCrmMcpServer(): McpServer {
         }
 
         return { content: [{ type: 'text', text: 'Invalid action. Must be "add" or "mark_received".' }] }
-      } catch (err: any) {
+      } catch (err: unknown) {
         return {
-          content: [{ type: 'text', text: `Error managing client asks: ${err?.message || String(err)}` }],
+          content: [{ type: 'text', text: `Error managing client asks: ${err instanceof Error ? err.message : String(err)}` }],
         }
       }
     },
@@ -401,8 +419,13 @@ export function createCrmMcpServer(): McpServer {
         required: ['projectCode', 'stageName', 'state'],
       }),
     },
-    async (args: any) => {
-      const { projectCode, stageName, state, note } = args || {}
+    async (args: unknown) => {
+      const { projectCode, stageName, state, note } = (args || {}) as {
+        projectCode?: string
+        stageName?: string
+        state?: (typeof STAGE_STATES)[number]
+        note?: string
+      }
       try {
         await connectDB()
         const project = await Project.findOne({ code: String(projectCode).toUpperCase().trim() })
@@ -415,13 +438,14 @@ export function createCrmMcpServer(): McpServer {
         const existing = project.stages.find(
           (s) => s.name.toLowerCase() === String(stageName).toLowerCase().trim(),
         )
+        const targetState = (state || 'active') as (typeof STAGE_STATES)[number]
         if (existing) {
-          existing.state = state
+          existing.state = targetState
           if (note) existing.note = String(note).trim()
         } else {
           project.stages.push({
             name: String(stageName).trim(),
-            state,
+            state: targetState,
             note: note ? String(note).trim() : undefined,
             owner: 'Human Saucer',
           })
@@ -436,9 +460,9 @@ export function createCrmMcpServer(): McpServer {
             },
           ],
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         return {
-          content: [{ type: 'text', text: `Error updating project stage: ${err?.message || String(err)}` }],
+          content: [{ type: 'text', text: `Error updating project stage: ${err instanceof Error ? err.message : String(err)}` }],
         }
       }
     },
@@ -461,8 +485,8 @@ export function createCrmMcpServer(): McpServer {
         },
       }),
     },
-    async (args: any) => {
-      const { search } = args || {}
+    async (args: unknown) => {
+      const { search } = (args || {}) as { search?: string }
       try {
         await connectDB()
         const query = search
@@ -491,9 +515,9 @@ export function createCrmMcpServer(): McpServer {
         return {
           content: [{ type: 'text', text: JSON.stringify(summary, null, 2) }],
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         return {
-          content: [{ type: 'text', text: `Error listing clients: ${err?.message || String(err)}` }],
+          content: [{ type: 'text', text: `Error listing clients: ${err instanceof Error ? err.message : String(err)}` }],
         }
       }
     },
@@ -534,8 +558,14 @@ export function createCrmMcpServer(): McpServer {
         required: ['name', 'clientName', 'budgetAmountAED'],
       }),
     },
-    async (args: any) => {
-      const { name, clientName, budgetAmountAED, description, plannedDuration } = args || {}
+    async (args: unknown) => {
+      const { name, clientName, budgetAmountAED, description, plannedDuration } = (args || {}) as {
+        name?: string
+        clientName?: string
+        budgetAmountAED?: number
+        description?: string
+        plannedDuration?: string
+      }
       try {
         await connectDB()
 
@@ -602,9 +632,9 @@ export function createCrmMcpServer(): McpServer {
             },
           ],
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         return {
-          content: [{ type: 'text', text: `Error creating project: ${err?.message || String(err)}` }],
+          content: [{ type: 'text', text: `Error creating project: ${err instanceof Error ? err.message : String(err)}` }],
         }
       }
     },

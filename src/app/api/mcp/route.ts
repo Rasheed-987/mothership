@@ -49,7 +49,7 @@ function ensureAcceptHeader(req: Request): Request {
       method: req.method,
       headers,
       body: req.body,
-      // @ts-ignore Node/Undici duplex requirement
+      // @ts-expect-error Node/Undici duplex requirement
       duplex: 'half',
     })
   }

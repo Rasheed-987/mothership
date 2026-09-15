@@ -2,9 +2,8 @@ import 'server-only'
 import { connectDB } from '@/lib/db'
 import { Invoice } from '@/models/Invoice'
 import { Payment } from '@/models/Payment'
-import { Expense } from '@/models/Expense'
 import { Project } from '@/models/Project'
-import { VendorPayment, type IVendorPayment } from '@/models/VendorPayment'
+import { VendorPayment } from '@/models/VendorPayment'
 import { FinancialSnapshot, type IFinancialSnapshotPL, type IFinancialSnapshotBS, type IFinancialSnapshotCF } from '@/models/FinancialSnapshot'
 import { Client } from '@/models/Client'
 import type { CurrentUser } from '@/lib/authz'
@@ -278,15 +277,19 @@ export async function getBankReconciliation(ym: string): Promise<IReconTransacti
     .populate('invoiceId', 'number')
     .lean()
 
-  return payments.map((p: any) => ({
-    id: String(p._id),
-    date: p.receivedAt.toISOString().slice(0, 10),
-    client: p.clientId?.name || 'Client',
-    project: p.reference || 'Engagement',
-    invoice: p.invoiceId?.number || 'INV-2026-000',
-    amount: p.amount,
-    notes: p.notes || 'Part payment received via bank transfer.',
-  }))
+  return payments.map((p: Record<string, unknown>) => {
+    const client = p.clientId as { name?: string } | null | undefined
+    const invoice = p.invoiceId as { number?: string } | null | undefined
+    return {
+      id: String(p._id),
+      date: (p.receivedAt as Date).toISOString().slice(0, 10),
+      client: client?.name || 'Client',
+      project: (p.reference as string) || 'Engagement',
+      invoice: invoice?.number || 'INV-2026-000',
+      amount: p.amount as number,
+      notes: (p.notes as string) || 'Part payment received via bank transfer.',
+    }
+  })
 }
 
 export async function createReconTransactionAction(
@@ -350,14 +353,19 @@ export async function getCompletedProjects(ym: string): Promise<ICompletedProjec
     if (inv.projectId) invoiceMap.set(String(inv.projectId), inv.number)
   })
 
-  return projects.map((p: any) => ({
-    id: String(p._id),
-    project: p.name,
-    client: p.clientId?.name || 'Client',
-    invoice: invoiceMap.get(String(p._id)) || `INV-${p.code}`,
-    date: p.completedAt ? p.completedAt.toISOString().slice(0, 10) : ym + '-15',
-    value: p.budget?.amount ? Math.round(p.budget.amount / 100) : 50000,
-  }))
+  return projects.map((p: Record<string, unknown>) => {
+    const client = p.clientId as { name?: string } | null | undefined
+    const budget = p.budget as { amount?: number } | null | undefined
+    const completedAt = p.completedAt as Date | null | undefined
+    return {
+      id: String(p._id),
+      project: p.name as string,
+      client: client?.name || 'Client',
+      invoice: invoiceMap.get(String(p._id)) || `INV-${p.code}`,
+      date: completedAt ? completedAt.toISOString().slice(0, 10) : ym + '-15',
+      value: budget?.amount ? Math.round(budget.amount / 100) : 50000,
+    }
+  })
 }
 
 export async function createCompletedProjectAction(

@@ -112,6 +112,7 @@ export default function ClientsView({ clients, canCreate = true, canEdit = true 
 
               <div className="mb-4 flex items-center gap-3">
                 {client.logoUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={client.logoUrl}
                     alt={client.name}

@@ -27,8 +27,8 @@ export async function createVendorPaymentFormAction(_prev: FormState, formData: 
     if (!vendorName) return { error: 'Vendor name is required' }
 
     await createVendorPaymentAction(actor, { vendorName, clientName, projectName, cost, paid })
-  } catch (err: any) {
-    return { error: err?.message || 'Failed to create vendor payment' }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Failed to create vendor payment' }
   }
 
   revalidatePath('/dashboard/financials')
@@ -50,8 +50,8 @@ export async function updateVendorPaymentFormAction(_prev: FormState, formData: 
     if (!id || !vendorName) return { error: 'Invalid form submission' }
 
     await updateVendorPaymentAction(actor, id, { vendorName, clientName, projectName, cost, paid })
-  } catch (err: any) {
-    return { error: err?.message || 'Failed to update vendor payment' }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Failed to update vendor payment' }
   }
 
   revalidatePath('/dashboard/financials')
@@ -67,8 +67,8 @@ export async function deleteVendorPaymentFormAction(_prev: FormState, formData: 
     if (!id) return { error: 'Missing ID' }
 
     await deleteVendorPaymentAction(actor, id)
-  } catch (err: any) {
-    return { error: err?.message || 'Failed to delete vendor payment' }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Failed to delete vendor payment' }
   }
 
   revalidatePath('/dashboard/financials')
@@ -90,8 +90,8 @@ export async function createReconTransactionFormAction(_prev: FormState, formDat
     if (!clientName) return { error: 'Client name is required' }
 
     await createReconTransactionAction(actor, { date, clientName, projectName, invoiceNumber, amount, notes })
-  } catch (err: any) {
-    return { error: err?.message || 'Failed to add transaction' }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Failed to add transaction' }
   }
 
   revalidatePath('/dashboard/financials')
@@ -107,8 +107,8 @@ export async function deleteReconTransactionFormAction(_prev: FormState, formDat
     if (!id) return { error: 'Missing ID' }
 
     await deleteReconTransactionAction(actor, id)
-  } catch (err: any) {
-    return { error: err?.message || 'Failed to delete transaction' }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Failed to delete transaction' }
   }
 
   revalidatePath('/dashboard/financials')
@@ -129,8 +129,8 @@ export async function createCompletedProjectFormAction(_prev: FormState, formDat
     if (!project) return { error: 'Project name is required' }
 
     await createCompletedProjectAction(actor, { project, clientName, invoiceNumber, date, value })
-  } catch (err: any) {
-    return { error: err?.message || 'Failed to add project' }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Failed to add project' }
   }
 
   revalidatePath('/dashboard/financials')
@@ -146,8 +146,8 @@ export async function deleteCompletedProjectFormAction(_prev: FormState, formDat
     if (!id) return { error: 'Missing ID' }
 
     await deleteCompletedProjectAction(actor, id)
-  } catch (err: any) {
-    return { error: err?.message || 'Failed to delete project' }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Failed to delete project' }
   }
 
   revalidatePath('/dashboard/financials')

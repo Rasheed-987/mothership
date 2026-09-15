@@ -99,6 +99,7 @@ export default function ClientDetailView({ client, canEdit = true }: ClientDetai
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-6">
         <div className="flex items-center gap-4">
           {client.logoUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={client.logoUrl}
               alt={client.name}
